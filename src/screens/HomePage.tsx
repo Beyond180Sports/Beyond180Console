@@ -31,7 +31,6 @@ type HomePageProps = {
 
 type DestinationPanelProps = {
   title: string;
-  subtitle: string;
   gradientColors: [string, string, ...string[]];
   gradientLocations: [number, number, ...number[]];
   gradientStart: { x: number; y: number };
@@ -42,7 +41,6 @@ type DestinationPanelProps = {
 
 function DestinationPanel({
   title,
-  subtitle,
   gradientColors,
   gradientLocations,
   gradientStart,
@@ -113,7 +111,6 @@ function DestinationPanel({
           style={StyleSheet.absoluteFill}
         />
         <Text style={styles.panelTitle}>{title}</Text>
-        <Text style={styles.panelSubtitle}>{subtitle}</Text>
         <Text style={styles.panelCta}>Enter →</Text>
       </Pressable>
     </Animated.View>
@@ -150,7 +147,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <View style={[styles.panels, isWide ? styles.panelsRow : styles.panelsColumn]}>
         <DestinationPanel
           title="Coach180"
-          subtitle="Training plans, sessions, and athlete development."
           gradientColors={['#1E6FE8', '#4A8FF0', '#D6E8FF', '#FFFFFF']}
           gradientLocations={[0, 0.05, 0.28, 0.5]}
           gradientStart={isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 }}
@@ -160,7 +156,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         />
         <DestinationPanel
           title="Sports Analytics"
-          subtitle="Performance data, insights, and game intelligence."
           gradientColors={['#FFFFFF', '#D6E8FF', '#4A8FF0', '#1E6FE8']}
           gradientLocations={[0.5, 0.72, 0.95, 1]}
           gradientStart={isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 }}
@@ -234,14 +229,6 @@ const styles = StyleSheet.create({
     fontSize: 56,
     letterSpacing: 1.5,
     color: '#123A7A',
-    marginBottom: 10,
-  },
-  panelSubtitle: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 16,
-    lineHeight: 24,
-    color: 'rgba(18, 58, 122, 0.72)',
-    maxWidth: 320,
     marginBottom: 28,
   },
   panelCta: {

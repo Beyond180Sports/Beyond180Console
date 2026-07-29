@@ -3,12 +3,16 @@ import { DMSans_400Regular, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import type { SquadRecord } from './src/lib/squads';
 import HomePage from './src/screens/HomePage';
 import SectionPlaceholder from './src/screens/SectionPlaceholder';
+import SportsAnalyticsPage from './src/screens/SportsAnalyticsPage';
+import SquadAnalyticsPage from './src/screens/SquadAnalyticsPage';
 import type { AppSection } from './src/types/navigation';
 
 export default function App() {
   const [section, setSection] = useState<AppSection>('home');
+  const [selectedSquad, setSelectedSquad] = useState<SquadRecord | null>(null);
   const [fontsLoaded] = useFonts({
     BebasNeue_400Regular,
     DMSans_400Regular,
@@ -33,11 +37,16 @@ export default function App() {
           onBack={() => setSection('home')}
         />
       )}
-      {section === 'sports-analytics' && (
-        <SectionPlaceholder
-          title="Sports Analytics"
-          description="Analytics dashboards and performance insights live here. This is a placeholder for the Sports Analytics section."
+      {section === 'sports-analytics' && !selectedSquad && (
+        <SportsAnalyticsPage
           onBack={() => setSection('home')}
+          onSelectSquad={setSelectedSquad}
+        />
+      )}
+      {section === 'sports-analytics' && selectedSquad && (
+        <SquadAnalyticsPage
+          squad={selectedSquad}
+          onBack={() => setSelectedSquad(null)}
         />
       )}
       <StatusBar style="dark" />
