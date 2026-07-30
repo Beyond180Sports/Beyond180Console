@@ -11,6 +11,11 @@
     "analytics": "npm run web -w @beyond180/sports-analytics -- --port 8082",
     "analytics:start": "npm run start -w @beyond180/sports-analytics -- --port 8082",
     "build:homepage": "npm run build -w @beyond180/homepage",
-    "build:analytics": "npm run build -w @beyond180/sports-analytics"
+    "build:analytics": "npm run build -w @beyond180/sports-analytics",
+    "start:homepage": "serve apps/homepage/dist -s -l tcp://0.0.0.0:${PORT:-3000}",
+    "start:analytics": "serve apps/sports-analytics/dist -s -l tcp://0.0.0.0:${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.6"
   }
 }
