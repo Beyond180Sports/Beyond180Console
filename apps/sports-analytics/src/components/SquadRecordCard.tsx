@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { SquadRecord } from '../lib/squads';
+import type { SquadRecord } from '@beyond180/shared';
 
 type SquadRecordCardProps = {
   squad: SquadRecord;

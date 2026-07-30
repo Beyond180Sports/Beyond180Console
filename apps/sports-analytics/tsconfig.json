@@ -1,0 +1,11 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@beyond180/shared": ["../../packages/shared/src/index.ts"],
+      "@beyond180/shared/*": ["../../packages/shared/src/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "../../packages/shared/src/**/*.ts", "../../packages/shared/types/**/*.ts"]
+}

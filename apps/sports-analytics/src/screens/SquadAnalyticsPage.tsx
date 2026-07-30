@@ -7,10 +7,13 @@ import {
   Text,
   View,
 } from 'react-native';
+import {
+  fetchSquadSubTeams,
+  squadColorHex,
+  type SquadRecord,
+  type SubTeamOption,
+} from '@beyond180/shared';
 import SubTeamCombobox from '../components/SubTeamCombobox';
-import type { SquadRecord } from '../lib/squads';
-import { fetchSquadSubTeams, type SubTeamOption } from '../lib/subteams';
-import { squadColorHex } from '../lib/teamColors';
 
 type SquadAnalyticsPageProps = {
   squad: SquadRecord;

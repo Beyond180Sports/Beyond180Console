@@ -1,4 +1,4 @@
-import type { SubTeam } from '../../types/db';
+import type { SubTeam } from '../types/db';
 import { supabase } from './supabase';
 
 export type SubTeamOption = Pick<SubTeam, 'id' | 'name' | 'leagueName' | 'teamId'>;

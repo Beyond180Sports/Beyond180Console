@@ -1,4 +1,4 @@
-import type { TeamColor } from '../../types/db';
+import type { TeamColor } from '../types/db';
 
 const TEAM_COLOR_HEX: Record<TeamColor, string> = {
   RED: '#C62828',

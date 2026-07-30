@@ -11,25 +11,23 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import type { AppSection } from '../types/navigation';
 
 const useNativeDriver = Platform.OS !== 'web';
 const dragonflyLogo = require('../../assets/dragonfly-logo.png');
 const coach180Logo = require('../../assets/coach180-logo.png');
 const video180Logo = require('../../assets/video180-logo.png');
-const COACH180_URL = 'https://coach180.beyond180.com/';
 
-function openCoach180() {
+const COACH180_URL = 'https://coach180.beyond180.com/';
+const SPORTS_ANALYTICS_URL =
+  process.env.EXPO_PUBLIC_SPORTS_ANALYTICS_URL ?? 'http://localhost:8082';
+
+function openExternalUrl(url: string) {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    window.open(COACH180_URL, '_blank', 'noopener,noreferrer');
+    window.open(url, '_blank', 'noopener,noreferrer');
     return;
   }
-  void Linking.openURL(COACH180_URL);
+  void Linking.openURL(url);
 }
-
-type HomePageProps = {
-  onNavigate: (section: AppSection) => void;
-};
 
 type DestinationPanelProps = {
   title: string;
@@ -143,7 +141,7 @@ function DestinationPanel({
   );
 }
 
-export default function HomePage({ onNavigate }: HomePageProps) {
+export default function HomePage() {
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
   const bannerFade = useRef(new Animated.Value(0)).current;
@@ -194,7 +192,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             gradientStart={leftGradient.start}
             gradientEnd={leftGradient.end}
             delay={120}
-            onPress={openCoach180}
+            onPress={() => openExternalUrl(COACH180_URL)}
             backgroundImage={coach180Logo}
           />
           <DestinationPanel
@@ -205,7 +203,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             gradientStart={rightGradient.start}
             gradientEnd={rightGradient.end}
             delay={200}
-            onPress={() => onNavigate('sports-analytics')}
+            onPress={() => openExternalUrl(SPORTS_ANALYTICS_URL)}
           />
         </View>
         <View style={[styles.panelRow, !isWide && styles.panelRowStacked]}>

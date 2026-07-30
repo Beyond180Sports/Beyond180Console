@@ -1,4 +1,4 @@
-import type { SubTeam, Team } from '../../types/db';
+import type { SubTeam, Team } from '../types/db';
 import { supabase } from './supabase';
 
 /** Temporary hardcoded staff identity until auth is wired up. */

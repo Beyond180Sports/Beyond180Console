@@ -2,25 +2,36 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Linking,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import SquadRecordCard from '../components/SquadRecordCard';
 import {
   DEMO_STAFF_EMAIL,
   fetchStaffSquads,
   type SquadRecord,
-} from '../lib/squads';
+} from '@beyond180/shared';
+import SquadRecordCard from '../components/SquadRecordCard';
+
+const HOMEPAGE_URL =
+  process.env.EXPO_PUBLIC_HOMEPAGE_URL ?? 'http://localhost:8081';
+
+function openHomepage() {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.location.href = HOMEPAGE_URL;
+    return;
+  }
+  void Linking.openURL(HOMEPAGE_URL);
+}
 
 type SportsAnalyticsPageProps = {
-  onBack: () => void;
   onSelectSquad: (squad: SquadRecord) => void;
 };
 
 export default function SportsAnalyticsPage({
-  onBack,
   onSelectSquad,
 }: SportsAnalyticsPageProps) {
   const [squads, setSquads] = useState<SquadRecord[]>([]);
@@ -57,7 +68,7 @@ export default function SportsAnalyticsPage({
 
   return (
     <View style={styles.root}>
-      <Pressable accessibilityRole="button" onPress={onBack} style={styles.back}>
+      <Pressable accessibilityRole="button" onPress={openHomepage} style={styles.back}>
         <Text style={styles.backText}>← Beyond180 Sports</Text>
       </Pressable>
 

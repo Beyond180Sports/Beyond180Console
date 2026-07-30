@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import type { SubTeamOption } from '../lib/subteams';
+import type { SubTeamOption } from '@beyond180/shared';
 
 type SubTeamComboboxProps = {
   options: SubTeamOption[];
