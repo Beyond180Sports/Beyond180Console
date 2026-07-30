@@ -15,6 +15,8 @@ import type { AppSection } from '../types/navigation';
 
 const useNativeDriver = Platform.OS !== 'web';
 const dragonflyLogo = require('../../assets/dragonfly-logo.png');
+const coach180Logo = require('../../assets/coach180-logo.png');
+const video180Logo = require('../../assets/video180-logo.png');
 const COACH180_URL = 'https://coach180.beyond180.com/';
 
 function openCoach180() {
@@ -31,26 +33,31 @@ type HomePageProps = {
 
 type DestinationPanelProps = {
   title: string;
+  subtitle: string;
   gradientColors: [string, string, ...string[]];
   gradientLocations: [number, number, ...number[]];
   gradientStart: { x: number; y: number };
   gradientEnd: { x: number; y: number };
   delay: number;
-  onPress: () => void;
+  onPress?: () => void;
+  backgroundImage?: number;
 };
 
 function DestinationPanel({
   title,
+  subtitle,
   gradientColors,
   gradientLocations,
   gradientStart,
   gradientEnd,
   delay,
   onPress,
+  backgroundImage,
 }: DestinationPanelProps) {
   const fade = useRef(new Animated.Value(0)).current;
   const rise = useRef(new Animated.Value(28)).current;
   const scale = useRef(new Animated.Value(1)).current;
+  const isInteractive = Boolean(onPress);
 
   useEffect(() => {
     Animated.parallel([
@@ -80,9 +87,13 @@ function DestinationPanel({
       ]}
     >
       <Pressable
-        accessibilityRole="button"
+        accessibilityRole={isInteractive ? 'button' : undefined}
+        disabled={!isInteractive}
         onPress={onPress}
         onPressIn={() => {
+          if (!isInteractive) {
+            return;
+          }
           Animated.spring(scale, {
             toValue: 0.985,
             useNativeDriver,
@@ -91,6 +102,9 @@ function DestinationPanel({
           }).start();
         }}
         onPressOut={() => {
+          if (!isInteractive) {
+            return;
+          }
           Animated.spring(scale, {
             toValue: 1,
             useNativeDriver,
@@ -100,7 +114,8 @@ function DestinationPanel({
         }}
         style={({ hovered, pressed }) => [
           styles.panel,
-          (hovered || pressed) && styles.panelPressed,
+          isInteractive && styles.panelInteractive,
+          isInteractive && (hovered || pressed) && styles.panelPressed,
         ]}
       >
         <LinearGradient
@@ -110,7 +125,18 @@ function DestinationPanel({
           end={gradientEnd}
           style={StyleSheet.absoluteFill}
         />
+        {backgroundImage != null && (
+          <View style={styles.panelBackgroundImageWrap} pointerEvents="none">
+            <Image
+              source={backgroundImage}
+              style={styles.panelBackgroundImage}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
+          </View>
+        )}
         <Text style={styles.panelTitle}>{title}</Text>
+        <Text style={styles.panelSubtitle}>{subtitle}</Text>
         <Text style={styles.panelCta}>Enter →</Text>
       </Pressable>
     </Animated.View>
@@ -130,6 +156,20 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     }).start();
   }, [bannerFade]);
 
+  const leftGradient = {
+    colors: ['#1E6FE8', '#4A8FF0', '#D6E8FF', '#FFFFFF'] as [string, string, ...string[]],
+    locations: [0, 0.05, 0.28, 0.5] as [number, number, ...number[]],
+    start: isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 },
+    end: isWide ? { x: 1, y: 0.5 } : { x: 0.5, y: 1 },
+  };
+
+  const rightGradient = {
+    colors: ['#FFFFFF', '#D6E8FF', '#4A8FF0', '#1E6FE8'] as [string, string, ...string[]],
+    locations: [0.5, 0.72, 0.95, 1] as [number, number, ...number[]],
+    start: isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 },
+    end: isWide ? { x: 1, y: 0.5 } : { x: 0.5, y: 1 },
+  };
+
   return (
     <View style={styles.root}>
       <Animated.View style={[styles.banner, { opacity: bannerFade }]}>
@@ -144,25 +184,51 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         </View>
       </Animated.View>
 
-      <View style={[styles.panels, isWide ? styles.panelsRow : styles.panelsColumn]}>
-        <DestinationPanel
-          title="Coach180"
-          gradientColors={['#1E6FE8', '#4A8FF0', '#D6E8FF', '#FFFFFF']}
-          gradientLocations={[0, 0.05, 0.28, 0.5]}
-          gradientStart={isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 }}
-          gradientEnd={isWide ? { x: 1, y: 0.5 } : { x: 0.5, y: 1 }}
-          delay={120}
-          onPress={openCoach180}
-        />
-        <DestinationPanel
-          title="Sports Analytics"
-          gradientColors={['#FFFFFF', '#D6E8FF', '#4A8FF0', '#1E6FE8']}
-          gradientLocations={[0.5, 0.72, 0.95, 1]}
-          gradientStart={isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 }}
-          gradientEnd={isWide ? { x: 1, y: 0.5 } : { x: 0.5, y: 1 }}
-          delay={240}
-          onPress={() => onNavigate('sports-analytics')}
-        />
+      <View style={styles.panels}>
+        <View style={[styles.panelRow, !isWide && styles.panelRowStacked]}>
+          <DestinationPanel
+            title="Coach180"
+            subtitle="Squad and player management with team event scheduling and game event tracking."
+            gradientColors={leftGradient.colors}
+            gradientLocations={leftGradient.locations}
+            gradientStart={leftGradient.start}
+            gradientEnd={leftGradient.end}
+            delay={120}
+            onPress={openCoach180}
+            backgroundImage={coach180Logo}
+          />
+          <DestinationPanel
+            title="Sports Analytics"
+            subtitle="Time series analytics for data collected across Beyond180 Sports platforms."
+            gradientColors={rightGradient.colors}
+            gradientLocations={rightGradient.locations}
+            gradientStart={rightGradient.start}
+            gradientEnd={rightGradient.end}
+            delay={200}
+            onPress={() => onNavigate('sports-analytics')}
+          />
+        </View>
+        <View style={[styles.panelRow, !isWide && styles.panelRowStacked]}>
+          <DestinationPanel
+            title="Admin Tools"
+            subtitle="Support for bulk squad uploads, PDF loaders, and video loaders."
+            gradientColors={leftGradient.colors}
+            gradientLocations={leftGradient.locations}
+            gradientStart={leftGradient.start}
+            gradientEnd={leftGradient.end}
+            delay={280}
+          />
+          <DestinationPanel
+            title="Video180"
+            subtitle="Game video loader that uses AI engines to analyze footage and extract insights."
+            gradientColors={rightGradient.colors}
+            gradientLocations={rightGradient.locations}
+            gradientStart={rightGradient.start}
+            gradientEnd={rightGradient.end}
+            delay={360}
+            backgroundImage={video180Logo}
+          />
+        </View>
       </View>
     </View>
   );
@@ -203,10 +269,12 @@ const styles = StyleSheet.create({
     gap: 1,
     backgroundColor: 'rgba(30, 111, 232, 0.2)',
   },
-  panelsRow: {
+  panelRow: {
+    flex: 1,
     flexDirection: 'row',
+    gap: 1,
   },
-  panelsColumn: {
+  panelRowStacked: {
     flexDirection: 'column',
   },
   panelShell: {
@@ -218,18 +286,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: 36,
     paddingVertical: 40,
     overflow: 'hidden',
-    cursor: 'pointer',
     backgroundColor: '#FFFFFF',
+  },
+  panelBackgroundImageWrap: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  panelBackgroundImage: {
+    width: '61%',
+    height: '61%',
+    maxWidth: 320,
+    maxHeight: 320,
+    opacity: 0.92,
+  },
+  panelInteractive: {
+    cursor: 'pointer',
   },
   panelPressed: {
     opacity: 0.92,
   },
   panelTitle: {
     fontFamily: 'BebasNeue_400Regular',
-    fontSize: 56,
+    fontSize: 48,
     letterSpacing: 1.5,
     color: '#123A7A',
-    marginBottom: 28,
+    marginBottom: 10,
+  },
+  panelSubtitle: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    lineHeight: 22,
+    color: 'rgba(18, 58, 122, 0.72)',
+    maxWidth: 300,
+    marginBottom: 20,
   },
   panelCta: {
     fontFamily: 'DMSans_700Bold',
