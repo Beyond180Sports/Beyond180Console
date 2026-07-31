@@ -2,7 +2,7 @@ import type { SubTeam, Team } from '../types/db';
 import { supabase } from './supabase';
 
 /** Temporary hardcoded staff identity until auth is wired up. */
-export const DEMO_STAFF_EMAIL = 'm6riley@uwaterloo.ca';
+export const DEMO_STAFF_EMAIL = 'matthew.riley2471@gmail.com';
 
 export type SquadRecord = Team & {
   SubTeam: Pick<SubTeam, 'id' | 'name' | 'leagueName'>[];

@@ -6,3 +6,8 @@ export {
 } from './squads';
 export { fetchSquadSubTeams, type SubTeamOption } from './subteams';
 export { squadColorHex } from './teamColors';
+export {
+  fetchGameStatTimeSeries,
+  type GameStatEvent,
+  type GameStatTimePoint,
+} from './gameStats';

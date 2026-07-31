@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { SubTeamOption } from '@beyond180/shared';
 
 type SubTeamComboboxProps = {
@@ -59,69 +59,96 @@ export default function SubTeamCombobox({
     onChange([]);
   }
 
-  return (
-    <View style={styles.root}>
-      <Text style={styles.label}>Teams to include</Text>
-      <Pressable
-        accessibilityRole="button"
-        disabled={disabled || options.length === 0}
-        onPress={() => setOpen((value) => !value)}
-        style={({ pressed }) => [
-          styles.trigger,
-          (disabled || options.length === 0) && styles.triggerDisabled,
-          pressed && styles.triggerPressed,
-        ]}
-      >
-        <Text
-          style={[
-            styles.triggerText,
-            selectedIds.length === 0 && styles.triggerPlaceholder,
-          ]}
-          numberOfLines={1}
-        >
-          {summary}
-        </Text>
-        <Text style={styles.chevron}>{open ? '▴' : '▾'}</Text>
-      </Pressable>
+  function close() {
+    setOpen(false);
+  }
 
-      {open && options.length > 0 && (
-        <View style={styles.menu}>
-          <View style={styles.menuActions}>
-            <Pressable onPress={selectAll} style={styles.menuAction}>
-              <Text style={styles.menuActionText}>Select all</Text>
-            </Pressable>
-            <Pressable onPress={clearAll} style={styles.menuAction}>
-              <Text style={styles.menuActionText}>Clear</Text>
-            </Pressable>
-          </View>
-          {options.map((option) => {
-            const selected = selectedIds.includes(option.id);
-            return (
-              <Pressable
-                key={option.id}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: selected }}
-                onPress={() => toggleOption(option.id)}
-                style={({ pressed }) => [
-                  styles.option,
-                  selected && styles.optionSelected,
-                  pressed && styles.optionPressed,
-                ]}
-              >
-                <View style={[styles.checkbox, selected && styles.checkboxSelected]}>
-                  {selected && <Text style={styles.checkmark}>✓</Text>}
-                </View>
-                <Text style={styles.optionText}>{optionLabel(option)}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+  return (
+    <>
+      {open && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss teams menu"
+          onPress={close}
+          style={[styles.backdrop, Platform.OS === 'web' && styles.backdropWeb]}
+        />
       )}
-    </View>
+
+      <View style={styles.root}>
+        <Text style={styles.label}>Teams to include</Text>
+        <Pressable
+          accessibilityRole="button"
+          disabled={disabled || options.length === 0}
+          onPress={() => setOpen((value) => !value)}
+          style={({ pressed }) => [
+            styles.trigger,
+            (disabled || options.length === 0) && styles.triggerDisabled,
+            pressed && styles.triggerPressed,
+          ]}
+        >
+          <Text
+            style={[
+              styles.triggerText,
+              selectedIds.length === 0 && styles.triggerPlaceholder,
+            ]}
+            numberOfLines={1}
+          >
+            {summary}
+          </Text>
+          <Text style={styles.chevron}>{open ? '▴' : '▾'}</Text>
+        </Pressable>
+
+        {open && options.length > 0 && (
+          <View style={styles.menu}>
+            <View style={styles.menuActions}>
+              <Pressable onPress={selectAll} style={styles.menuAction}>
+                <Text style={styles.menuActionText}>Select all</Text>
+              </Pressable>
+              <Pressable onPress={clearAll} style={styles.menuAction}>
+                <Text style={styles.menuActionText}>Clear</Text>
+              </Pressable>
+            </View>
+            {options.map((option) => {
+              const selected = selectedIds.includes(option.id);
+              return (
+                <Pressable
+                  key={option.id}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: selected }}
+                  onPress={() => toggleOption(option.id)}
+                  style={({ pressed }) => [
+                    styles.option,
+                    selected && styles.optionSelected,
+                    pressed && styles.optionPressed,
+                  ]}
+                >
+                  <View style={[styles.checkbox, selected && styles.checkboxSelected]}>
+                    {selected && <Text style={styles.checkmark}>✓</Text>}
+                  </View>
+                  <Text style={styles.optionText}>{optionLabel(option)}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  backdrop: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 9,
+  },
+  backdropWeb: {
+    // @ts-expect-error web-only CSS position
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
   root: {
     width: '100%',
     maxWidth: 520,
