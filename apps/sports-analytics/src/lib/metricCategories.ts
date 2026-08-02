@@ -2,6 +2,9 @@ import type { GameStatTimePoint } from '@beyond180/shared';
 
 export type MetricCategoryId =
   | 'points'
+  | 'possession'
+  | 'handling'
+  | 'attack'
   | 'kicking'
   | 'disciplinary'
   | 'contact'
@@ -149,6 +152,216 @@ export const METRIC_CATEGORIES: MetricCategoryDef[] = [
             key: 'dropGoalsAgainstMade',
             label: 'Against',
             getValue: (row) => row.dropGoalsAgainstMade,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'possession',
+    label: 'Possession',
+    charts: [
+      {
+        id: 'possession-for-against',
+        title: 'Possession',
+        series: [
+          {
+            key: 'possessionFor',
+            label: 'For',
+            getValue: (row) => row.possessionFor,
+          },
+          {
+            key: 'possessionAgainst',
+            label: 'Against',
+            getValue: (row) => row.possessionAgainst,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'handling',
+    label: 'Handling',
+    charts: [
+      {
+        id: 'restart-retention-for-against',
+        title: 'Restart retention',
+        series: [
+          {
+            key: 'restartRetentionFor',
+            label: 'For',
+            getValue: (row) => row.restartRetentionFor,
+          },
+          {
+            key: 'restartRetentionAgainst',
+            label: 'Against',
+            getValue: (row) => row.restartRetentionAgainst,
+          },
+        ],
+      },
+      {
+        id: 'turnovers-for-against',
+        title: 'Turnovers',
+        series: [
+          {
+            key: 'turnoversFor',
+            label: 'For',
+            getValue: (row) => row.turnoversFor,
+          },
+          {
+            key: 'turnoversAgainst',
+            label: 'Against',
+            getValue: (row) => row.turnoversAgainst,
+          },
+        ],
+      },
+      {
+        id: 'handling-errors-for-against',
+        title: 'Handling errors',
+        series: [
+          {
+            key: 'handlingErrorsFor',
+            label: 'For',
+            getValue: (row) => row.handlingErrorsFor,
+          },
+          {
+            key: 'handlingErrorsAgainst',
+            label: 'Against',
+            getValue: (row) => row.handlingErrorsAgainst,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'attack',
+    label: 'Attack',
+    charts: [
+      {
+        id: 'offloads-for-against',
+        title: 'Offloads',
+        series: [
+          {
+            key: 'offloadsFor',
+            label: 'For',
+            getValue: (row) => row.offloadsFor,
+          },
+          {
+            key: 'offloadsAgainst',
+            label: 'Against',
+            getValue: (row) => row.offloadsAgainst,
+          },
+        ],
+      },
+      {
+        id: 'three-pass-phases-for-against',
+        title: '3 pass phases',
+        series: [
+          {
+            key: 'threePassPhasesFor',
+            label: 'For',
+            getValue: (row) => row.threePassPhasesFor,
+          },
+          {
+            key: 'threePassPhasesAgainst',
+            label: 'Against',
+            getValue: (row) => row.threePassPhasesAgainst,
+          },
+        ],
+      },
+      {
+        id: 'attack-off-nine-for-against',
+        title: 'Attack off nine',
+        series: [
+          {
+            key: 'offNineFor',
+            label: 'For',
+            getValue: (row) => row.offNineFor,
+          },
+          {
+            key: 'offNineAgainst',
+            label: 'Against',
+            getValue: (row) => row.offNineAgainst,
+          },
+        ],
+      },
+      {
+        id: 'attack-off-ten-for-against',
+        title: 'Attack off ten',
+        series: [
+          {
+            key: 'offTenFor',
+            label: 'For',
+            getValue: (row) => row.offTenFor,
+          },
+          {
+            key: 'offTenAgainst',
+            label: 'Against',
+            getValue: (row) => row.offTenAgainst,
+          },
+        ],
+      },
+      {
+        id: 'picks-for-against',
+        title: 'Picks',
+        series: [
+          {
+            key: 'picksFor',
+            label: 'For',
+            getValue: (row) => row.picksFor,
+          },
+          {
+            key: 'picksAgainst',
+            label: 'Against',
+            getValue: (row) => row.picksAgainst,
+          },
+        ],
+      },
+      {
+        id: '22-entry-points-for-against',
+        title: '22 entry points',
+        series: [
+          {
+            key: '22EntryPointsFor',
+            label: 'For',
+            getValue: (row) => row['22EntryPointsFor'],
+          },
+          {
+            key: '22EntryPointsAgainst',
+            label: 'Against',
+            getValue: (row) => row['22EntryPointsAgainst'],
+          },
+        ],
+      },
+      {
+        id: '22-entry-no-points-for-against',
+        title: '22 entry no points',
+        series: [
+          {
+            key: '22EntryNoPointsFor',
+            label: 'For',
+            getValue: (row) => row['22EntryNoPointsFor'],
+          },
+          {
+            key: '22EntryNoPointsAgainst',
+            label: 'Against',
+            getValue: (row) => row['22EntryNoPointsAgainst'],
+          },
+        ],
+      },
+      {
+        id: 'efficient-rucks-for-against',
+        title: 'Efficient rucks',
+        series: [
+          {
+            key: 'efficientRucksFor',
+            label: 'For',
+            getValue: (row) => row.efficientRucksFor,
+          },
+          {
+            key: 'efficientRucksAgainst',
+            label: 'Against',
+            getValue: (row) => row.efficientRucksAgainst,
           },
         ],
       },
@@ -894,13 +1107,95 @@ export function getChartsByIds(chartIds: string[]): MetricChartDef[] {
   });
 }
 
-export function moveChartId(chartIds: string[], fromId: string, toIndex: number): string[] {
-  const fromIndex = chartIds.indexOf(fromId);
-  if (fromIndex < 0 || toIndex < 0 || toIndex >= chartIds.length || fromIndex === toIndex) {
-    return chartIds;
+/** Layout rows for the chart grid: each row holds 1 (full-width) or 2 (half-width) chart ids. */
+export type ChartRows = string[][];
+
+export type ChartDropTarget =
+  | { kind: 'beside'; rowIndex: number; slotIndex: 0 | 1 }
+  | { kind: 'row'; rowIndex: number };
+
+export function flattenChartRows(rows: ChartRows): string[] {
+  return rows.flat();
+}
+
+export function chartRowsEqual(a: ChartRows, b: ChartRows): boolean {
+  if (a.length !== b.length) {
+    return false;
   }
-  const next = [...chartIds];
-  const [item] = next.splice(fromIndex, 1);
-  next.splice(toIndex, 0, item);
-  return next;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i].length !== b[i].length) {
+      return false;
+    }
+    for (let j = 0; j < a[i].length; j += 1) {
+      if (a[i][j] !== b[i][j]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+/** Keep row layout in sync when the combobox selection changes. New charts fill the last incomplete row. */
+export function reconcileChartRows(previous: ChartRows, nextIds: string[]): ChartRows {
+  const nextSet = new Set(nextIds);
+  const result = previous
+    .map((row) => row.filter((id) => nextSet.has(id)))
+    .filter((row) => row.length > 0)
+    .map((row) => [...row]);
+  const present = new Set(result.flat());
+
+  for (const id of nextIds) {
+    if (present.has(id)) {
+      continue;
+    }
+    const last = result[result.length - 1];
+    if (last && last.length === 1) {
+      last.push(id);
+    } else {
+      result.push([id]);
+    }
+    present.add(id);
+  }
+
+  return result;
+}
+
+export function removeChartFromRows(rows: ChartRows, chartId: string): ChartRows {
+  return rows
+    .map((row) => row.filter((id) => id !== chartId))
+    .filter((row) => row.length > 0);
+}
+
+export function moveChartInRows(
+  rows: ChartRows,
+  chartId: string,
+  target: ChartDropTarget,
+): ChartRows {
+  const next = removeChartFromRows(rows, chartId).map((row) => [...row]);
+
+  if (target.kind === 'row') {
+    const insertAt = Math.max(0, Math.min(target.rowIndex, next.length));
+    next.splice(insertAt, 0, [chartId]);
+    return chartRowsEqual(rows, next) ? rows : next;
+  }
+
+  if (next.length === 0) {
+    return [[chartId]];
+  }
+
+  const rowIndex = Math.max(0, Math.min(target.rowIndex, next.length - 1));
+  const row = next[rowIndex];
+
+  if (row.length === 1) {
+    next[rowIndex] =
+      target.slotIndex === 0 ? [chartId, row[0]] : [row[0], chartId];
+  } else {
+    // Insert into a full row; the overflowing chart gets its own row below.
+    const inserted = [...row];
+    inserted.splice(target.slotIndex, 0, chartId);
+    next[rowIndex] = [inserted[0], inserted[1]];
+    next.splice(rowIndex + 1, 0, [inserted[2]]);
+  }
+
+  return chartRowsEqual(rows, next) ? rows : next;
 }

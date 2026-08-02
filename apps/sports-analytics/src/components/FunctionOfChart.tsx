@@ -3,90 +3,35 @@ import { createPortal } from 'react-dom';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
+import type { TimeSeriesLine } from './TimeSeriesChart';
 
-export type TimeSeriesLine = {
+export type ScatterPoint = {
+  value: [number, number];
+  opponent: string | null;
+};
+
+export type ScatterSeries = {
   name: string;
-  data: (number | null)[];
+  data: ScatterPoint[];
   role?: 'for' | 'against' | 'other';
 };
 
-type ChartSeries = TimeSeriesLine & {
-  type?: 'bar' | 'line';
-  smooth?: boolean;
-  showSymbol?: boolean;
-  z?: number;
-  lineStyle?: { width?: number; type?: 'solid' | 'dashed' };
-  itemStyle?: { color?: string };
-};
-
-type TimeSeriesChartProps = {
+type FunctionOfChartProps = {
   title: string;
-  categories: string[];
-  series: TimeSeriesLine[];
+  xAxisName: string;
+  yAxisName: string;
+  series: ScatterSeries[];
   height?: number;
   highlighted?: boolean;
   dragging?: boolean;
-  asFunctionOfActive?: boolean;
-  asFunctionOfPickTarget?: boolean;
   onToggleHighlight?: () => void;
   onRemove?: () => void;
-  onAsFunctionOfPress?: () => void;
-  onSelectAsFunctionOfTarget?: () => void;
   onDragHandlePointerDown?: (event: {
     clientY: number;
     pointerId: number;
     target: unknown;
   }) => void;
 };
-
-const ROLLING_AVG_COLOR = '#EA580C';
-
-function cumulativeAverage(data: (number | null)[]): (number | null)[] {
-  let sum = 0;
-  let count = 0;
-  return data.map((value) => {
-    if (value == null) {
-      return count === 0 ? null : Math.round((sum / count) * 10) / 10;
-    }
-    sum += value;
-    count += 1;
-    return Math.round((sum / count) * 10) / 10;
-  });
-}
-
-function seriesForAverage(series: TimeSeriesLine[]): TimeSeriesLine[] {
-  const forSeries = series.filter((line) => line.role === 'for');
-  if (forSeries.length > 0) {
-    return forSeries;
-  }
-  return series.filter((line) => line.role !== 'against');
-}
-
-function averageSeriesName(line: TimeSeriesLine): string {
-  if (line.name === 'For' || line.name === 'For %') {
-    return 'Average';
-  }
-  if (/ — For %?$/.test(line.name)) {
-    return `${line.name.replace(/ — For %?$/, '')} — Average`;
-  }
-  if (line.name.includes(' — ')) {
-    return `${line.name.split(' — ')[0]} — Average`;
-  }
-  return 'Average';
-}
-
-function averageOverlaySeries(series: TimeSeriesLine[]): ChartSeries[] {
-  return seriesForAverage(series).map((line) => ({
-    name: averageSeriesName(line),
-    data: cumulativeAverage(line.data),
-    type: 'line' as const,
-    smooth: true,
-    showSymbol: true,
-    z: 10,
-    lineStyle: { width: 2.5, type: 'solid' as const },
-    itemStyle: { color: ROLLING_AVG_COLOR },
-  }));
-}
 
 type HoleRect = {
   top: number;
@@ -98,8 +43,7 @@ type HoleRect = {
 function EyeIcon({ active }: { active: boolean }) {
   const color = active ? '#1E6FE8' : '#6B7280';
   return (
-    <View accessibilityElementsHidden style={styles.highlightIcon}>
-      {/* RN Web supports inline SVG host elements */}
+    <View accessibilityElementsHidden style={styles.icon}>
       <svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
           d="M2.5 12s3.6-7 9.5-7 9.5 7 9.5 7-3.6 7-9.5 7-9.5-7-9.5-7Z"
@@ -116,14 +60,9 @@ function EyeIcon({ active }: { active: boolean }) {
 function TrashIcon() {
   const color = '#6B7280';
   return (
-    <View accessibilityElementsHidden style={styles.highlightIcon}>
+    <View accessibilityElementsHidden style={styles.icon}>
       <svg width={15} height={15} viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M4 7h16"
-          stroke={color}
-          strokeWidth={1.8}
-          strokeLinecap="round"
-        />
+        <path d="M4 7h16" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
         <path
           d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
           stroke={color}
@@ -146,7 +85,7 @@ function TrashIcon() {
 function GripIcon() {
   const color = '#6B7280';
   return (
-    <View accessibilityElementsHidden style={styles.highlightIcon}>
+    <View accessibilityElementsHidden style={styles.icon}>
       <svg width={15} height={15} viewBox="0 0 24 24" fill="none" aria-hidden>
         <circle cx="9" cy="7" r="1.5" fill={color} />
         <circle cx="15" cy="7" r="1.5" fill={color} />
@@ -157,102 +96,6 @@ function GripIcon() {
       </svg>
     </View>
   );
-}
-
-function TrendIcon({ active }: { active: boolean }) {
-  const color = active ? '#EA580C' : '#6B7280';
-  return (
-    <View accessibilityElementsHidden style={styles.highlightIcon}>
-      <svg width={15} height={15} viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M4 18V6"
-          stroke={color}
-          strokeWidth={1.8}
-          strokeLinecap="round"
-        />
-        <path
-          d="M4 18h16"
-          stroke={color}
-          strokeWidth={1.8}
-          strokeLinecap="round"
-        />
-        <path
-          d="M7 14l4-4 3 2.5 5-6"
-          stroke={color}
-          strokeWidth={1.8}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </View>
-  );
-}
-
-function FunctionOfIcon({ active }: { active: boolean }) {
-  return (
-    <Text
-      accessibilityElementsHidden
-      style={[styles.functionOfIconText, active && styles.functionOfIconTextActive]}
-    >
-      f(x)
-    </Text>
-  );
-}
-
-function buildOption(categories: string[], series: ChartSeries[]): EChartsOption {
-  return {
-    tooltip: {
-      trigger: 'axis',
-    },
-    legend: {
-      top: 4,
-      type: 'scroll',
-      textStyle: {
-        fontFamily: 'DM Sans, sans-serif',
-        color: '#374151',
-      },
-    },
-    grid: {
-      left: 40,
-      right: 16,
-      top: 44,
-      bottom: 64,
-    },
-    xAxis: {
-      type: 'category',
-      data: categories,
-      boundaryGap: true,
-      axisLabel: {
-        hideOverlap: true,
-        interval: 0,
-        fontFamily: 'DM Sans, sans-serif',
-        color: '#6B7280',
-        lineHeight: 16,
-      },
-    },
-    yAxis: {
-      type: 'value',
-      splitLine: {
-        lineStyle: {
-          color: '#E5E7EB',
-        },
-      },
-      axisLabel: {
-        fontFamily: 'DM Sans, sans-serif',
-        color: '#6B7280',
-      },
-    },
-    series: series.map((line) => ({
-      name: line.name,
-      type: line.type ?? 'bar',
-      data: line.data,
-      smooth: line.smooth,
-      showSymbol: line.showSymbol,
-      z: line.z,
-      lineStyle: line.lineStyle,
-      itemStyle: line.itemStyle,
-    })),
-  };
 }
 
 function HighlightOverlay({
@@ -280,53 +123,169 @@ function HighlightOverlay({
   return createPortal(
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Dismiss graph highlight"
+      accessibilityLabel="Exit highlight"
       onPress={onDismiss}
-      style={[
-        styles.overlay,
-        {
-          // @ts-expect-error web-only CSS
-          clipPath,
-        },
-      ]}
+      style={[styles.overlay, { clipPath } as object]}
     />,
     document.body,
   );
 }
 
-export default function TimeSeriesChart({
+function buildOption(
+  xAxisName: string,
+  yAxisName: string,
+  series: ScatterSeries[],
+): EChartsOption {
+  return {
+    tooltip: {
+      trigger: 'item',
+      formatter: (params: unknown) => {
+        const point = params as {
+          seriesName?: string;
+          data?: ScatterPoint | [number, number];
+          value?: [number, number];
+        };
+        const data = point.data;
+        const value = Array.isArray(data)
+          ? data
+          : data && 'value' in data
+            ? data.value
+            : point.value;
+        const [x, y] = value ?? [null, null];
+        const opponent =
+          data && !Array.isArray(data) && data.opponent ? data.opponent : null;
+        const lines = [
+          opponent ? `versus ${opponent}` : null,
+          point.seriesName && point.seriesName !== 'For' ? point.seriesName : null,
+          `${xAxisName}: ${x}`,
+          `${yAxisName}: ${y}`,
+        ].filter(Boolean);
+        return lines.join('<br/>');
+      },
+    },
+    legend: {
+      top: 4,
+      type: 'scroll',
+      textStyle: {
+        fontFamily: 'DM Sans, sans-serif',
+        color: '#374151',
+      },
+    },
+    grid: {
+      left: 48,
+      right: 16,
+      top: 44,
+      bottom: 56,
+    },
+    xAxis: {
+      type: 'value',
+      name: xAxisName,
+      nameLocation: 'middle',
+      nameGap: 30,
+      nameTextStyle: {
+        fontFamily: 'DM Sans, sans-serif',
+        color: '#6B7280',
+      },
+      splitLine: {
+        lineStyle: { color: '#E5E7EB' },
+      },
+      axisLabel: {
+        fontFamily: 'DM Sans, sans-serif',
+        color: '#6B7280',
+      },
+    },
+    yAxis: {
+      type: 'value',
+      name: yAxisName,
+      nameLocation: 'middle',
+      nameGap: 36,
+      nameTextStyle: {
+        fontFamily: 'DM Sans, sans-serif',
+        color: '#6B7280',
+      },
+      splitLine: {
+        lineStyle: { color: '#E5E7EB' },
+      },
+      axisLabel: {
+        fontFamily: 'DM Sans, sans-serif',
+        color: '#6B7280',
+      },
+    },
+    series: series.map((line) => ({
+      name: line.name,
+      type: 'scatter' as const,
+      data: line.data,
+      symbolSize: 10,
+    })),
+  };
+}
+
+export function buildScatterSeries(
+  xSeries: TimeSeriesLine[],
+  ySeries: TimeSeriesLine[],
+  opponentsByIndex: (string | null)[],
+): ScatterSeries[] {
+  const yForSeries = ySeries.filter((line) => line.role === 'for');
+  const xForSeries = xSeries.filter((line) => line.role === 'for');
+  const result: ScatterSeries[] = [];
+
+  for (const yLine of yForSeries) {
+    const xLine =
+      xForSeries.find((line) => line.name === yLine.name) ?? xForSeries[0];
+    if (!xLine) {
+      continue;
+    }
+
+    const data: ScatterPoint[] = [];
+    const length = Math.min(xLine.data.length, yLine.data.length);
+    for (let i = 0; i < length; i += 1) {
+      const x = xLine.data[i];
+      const y = yLine.data[i];
+      if (x == null || y == null) {
+        continue;
+      }
+      data.push({
+        value: [x, y],
+        opponent: opponentsByIndex[i] ?? null,
+      });
+    }
+
+    if (data.length > 0) {
+      result.push({
+        name: yLine.name,
+        data,
+        role: 'for',
+      });
+    }
+  }
+
+  return result;
+}
+
+export default function FunctionOfChart({
   title,
-  categories,
+  xAxisName,
+  yAxisName,
   series,
   height = 280,
   highlighted = false,
   dragging = false,
-  asFunctionOfActive = false,
-  asFunctionOfPickTarget = false,
   onToggleHighlight,
   onRemove,
-  onAsFunctionOfPress,
-  onSelectAsFunctionOfTarget,
   onDragHandlePointerDown,
-}: TimeSeriesChartProps) {
+}: FunctionOfChartProps) {
   const cardRef = useRef<View>(null);
   const [hole, setHole] = useState<HoleRect | null>(null);
   const [hoverHighlight, setHoverHighlight] = useState(false);
-  const [hoverRollingAvg, setHoverRollingAvg] = useState(false);
   const [hoverRemove, setHoverRemove] = useState(false);
   const [hoverDrag, setHoverDrag] = useState(false);
-  const [hoverAsFunctionOf, setHoverAsFunctionOf] = useState(false);
-  const [showRollingAverage, setShowRollingAverage] = useState(false);
   const onToggleHighlightRef = useRef(onToggleHighlight);
   onToggleHighlightRef.current = onToggleHighlight;
-  const canShowAverage = seriesForAverage(series).length > 0;
-  const option = useMemo(() => {
-    const chartSeries: ChartSeries[] = [...series];
-    if (showRollingAverage) {
-      chartSeries.push(...averageOverlaySeries(series));
-    }
-    return buildOption(categories, chartSeries);
-  }, [categories, series, showRollingAverage]);
+
+  const option = useMemo(
+    () => buildOption(xAxisName, yAxisName, series),
+    [xAxisName, yAxisName, series],
+  );
 
   useEffect(() => {
     if (!highlighted || Platform.OS !== 'web') {
@@ -384,9 +343,7 @@ export default function TimeSeriesChart({
   if (Platform.OS !== 'web') {
     return (
       <View style={[styles.fallback, { minHeight: height }]}>
-        <Text style={styles.fallbackText}>
-          Charts are available on web.
-        </Text>
+        <Text style={styles.fallbackText}>Charts are available on web.</Text>
       </View>
     );
   }
@@ -403,18 +360,8 @@ export default function TimeSeriesChart({
           styles.card,
           highlighted && styles.cardHighlighted,
           dragging && styles.cardDragging,
-          asFunctionOfActive && styles.cardAsFunctionOfSource,
-          asFunctionOfPickTarget && styles.cardAsFunctionOfTarget,
         ]}
       >
-        {asFunctionOfPickTarget && onSelectAsFunctionOfTarget && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Use ${title} as x-axis`}
-            onPress={onSelectAsFunctionOfTarget}
-            style={styles.pickTargetOverlay}
-          />
-        )}
         <View style={styles.header}>
           <Text style={styles.title} numberOfLines={2}>
             {title}
@@ -443,72 +390,6 @@ export default function TimeSeriesChart({
               </Pressable>
             </View>
 
-            {canShowAverage && (
-              <View style={styles.toolButtonWrap}>
-                {hoverRollingAvg && (
-                  <View style={styles.tooltip} pointerEvents="none">
-                    <Text style={styles.tooltipText}>
-                      {showRollingAverage
-                        ? 'Hide average'
-                        : 'Average (all games)'}
-                    </Text>
-                  </View>
-                )}
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    showRollingAverage
-                      ? 'Hide average'
-                      : 'Show average across all games'
-                  }
-                  accessibilityState={{ selected: showRollingAverage }}
-                  onPress={() => setShowRollingAverage((current) => !current)}
-                  onHoverIn={() => setHoverRollingAvg(true)}
-                  onHoverOut={() => setHoverRollingAvg(false)}
-                  style={({ pressed }) => [
-                    styles.toolButton,
-                    showRollingAverage && styles.toolButtonRollingActive,
-                    pressed && styles.toolButtonPressed,
-                  ]}
-                >
-                  <TrendIcon active={showRollingAverage} />
-                </Pressable>
-              </View>
-            )}
-
-            {onAsFunctionOfPress && (
-              <View style={styles.toolButtonWrap}>
-                {hoverAsFunctionOf && (
-                  <View style={styles.tooltip} pointerEvents="none">
-                    <Text style={styles.tooltipText}>
-                      {asFunctionOfActive
-                        ? 'Cancel as a function of'
-                        : 'As a function of'}
-                    </Text>
-                  </View>
-                )}
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    asFunctionOfActive
-                      ? 'Cancel as a function of'
-                      : 'As a function of'
-                  }
-                  accessibilityState={{ selected: asFunctionOfActive }}
-                  onPress={onAsFunctionOfPress}
-                  onHoverIn={() => setHoverAsFunctionOf(true)}
-                  onHoverOut={() => setHoverAsFunctionOf(false)}
-                  style={({ pressed }) => [
-                    styles.toolButton,
-                    asFunctionOfActive && styles.toolButtonActive,
-                    pressed && styles.toolButtonPressed,
-                  ]}
-                >
-                  <FunctionOfIcon active={asFunctionOfActive} />
-                </Pressable>
-              </View>
-            )}
-
             {onRemove && (
               <View style={styles.toolButtonWrap}>
                 {hoverRemove && (
@@ -532,7 +413,7 @@ export default function TimeSeriesChart({
               </View>
             )}
 
-            {onDragHandlePointerDown && !asFunctionOfPickTarget && (
+            {onDragHandlePointerDown && (
               <View style={styles.toolButtonWrap}>
                 {hoverDrag && !dragging && (
                   <View style={styles.tooltip} pointerEvents="none">
@@ -604,19 +485,6 @@ const styles = StyleSheet.create({
     borderColor: '#1E6FE8',
     boxShadow: '0 16px 36px rgba(18, 58, 122, 0.2)',
   } as object,
-  cardAsFunctionOfSource: {
-    borderColor: '#1E6FE8',
-    boxShadow: '0 0 0 1px rgba(30, 111, 232, 0.35)',
-  } as object,
-  cardAsFunctionOfTarget: {
-    borderColor: '#93C5FD',
-    cursor: 'pointer',
-  } as object,
-  pickTargetOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1,
-    cursor: 'pointer',
-  } as object,
   header: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -657,10 +525,6 @@ const styles = StyleSheet.create({
     borderColor: '#1E6FE8',
     backgroundColor: 'rgba(30, 111, 232, 0.08)',
   },
-  toolButtonRollingActive: {
-    borderColor: '#EA580C',
-    backgroundColor: 'rgba(234, 88, 12, 0.1)',
-  },
   toolButtonPressed: {
     opacity: 0.75,
   },
@@ -673,39 +537,31 @@ const styles = StyleSheet.create({
   tooltip: {
     position: 'absolute',
     right: 40,
-    top: 4,
+    top: 2,
+    backgroundColor: '#111827',
     paddingHorizontal: 8,
     paddingVertical: 5,
     borderRadius: 6,
-    backgroundColor: '#111827',
-  },
+    whiteSpace: 'nowrap',
+  } as object,
   tooltipText: {
     fontFamily: 'DMSans_400Regular',
     fontSize: 12,
     color: '#FFFFFF',
   },
-  highlightIcon: {
+  icon: {
     width: 16,
     height: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  functionOfIconText: {
-    fontFamily: 'DMSans_700Bold',
-    fontSize: 11,
-    letterSpacing: -0.2,
-    color: '#6B7280',
-  },
-  functionOfIconTextActive: {
-    color: '#1E6FE8',
-  },
   overlay: {
     position: 'fixed' as unknown as 'absolute',
     top: 0,
+    left: 0,
     right: 0,
     bottom: 0,
-    left: 0,
-    backgroundColor: 'rgba(8, 12, 22, 0.84)',
+    backgroundColor: 'rgba(17, 24, 39, 0.55)',
     zIndex: 1000,
     cursor: 'pointer',
   } as object,
@@ -715,11 +571,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
     borderRadius: 12,
-    backgroundColor: '#F9FAFB',
+    padding: 24,
   },
   fallbackText: {
     fontFamily: 'DMSans_400Regular',
     fontSize: 14,
-    color: 'rgba(18, 58, 122, 0.65)',
+    color: '#6B7280',
   },
 });
