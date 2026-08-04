@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Beyond180Homepage",
-    "slug": "Beyond180Homepage",
+    "name": "Beyond180 Console",
+    "slug": "Beyond180Console",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

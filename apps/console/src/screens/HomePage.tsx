@@ -18,8 +18,6 @@ const coach180Logo = require('../../assets/coach180-logo.png');
 const video180Logo = require('../../assets/video180-logo.png');
 
 const COACH180_URL = 'https://coach180.beyond180.com/';
-const SPORTS_ANALYTICS_URL =
-  process.env.EXPO_PUBLIC_SPORTS_ANALYTICS_URL ?? 'http://localhost:8082';
 
 function openExternalUrl(url: string) {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -141,7 +139,11 @@ function DestinationPanel({
   );
 }
 
-export default function HomePage() {
+export default function HomePage({
+  onOpenSportsAnalytics,
+}: {
+  onOpenSportsAnalytics: () => void;
+}) {
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
   const bannerFade = useRef(new Animated.Value(0)).current;
@@ -203,7 +205,7 @@ export default function HomePage() {
             gradientStart={rightGradient.start}
             gradientEnd={rightGradient.end}
             delay={200}
-            onPress={() => openExternalUrl(SPORTS_ANALYTICS_URL)}
+            onPress={onOpenSportsAnalytics}
           />
         </View>
         <View style={[styles.panelRow, !isWide && styles.panelRowStacked]}>

@@ -6,14 +6,10 @@
     "packages/*"
   ],
   "scripts": {
-    "homepage": "npm run web -w @beyond180/homepage -- --port 8081",
-    "homepage:start": "npm run start -w @beyond180/homepage -- --port 8081",
-    "analytics": "npm run web -w @beyond180/sports-analytics -- --port 8082",
-    "analytics:start": "npm run start -w @beyond180/sports-analytics -- --port 8082",
-    "build:homepage": "npm run build -w @beyond180/homepage",
-    "build:analytics": "npm run build -w @beyond180/sports-analytics",
-    "start:homepage": "node scripts/serve-static.js apps/homepage/dist",
-    "start:analytics": "node scripts/serve-static.js apps/sports-analytics/dist"
+    "console": "npm run web -w @beyond180/console -- --port 8081",
+    "console:start": "npm run start -w @beyond180/console -- --port 8081",
+    "build:console": "npm run build -w @beyond180/console",
+    "start:console": "node scripts/serve-static.js apps/console/dist"
   },
   "dependencies": {
     "serve": "^14.2.6"

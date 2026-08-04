@@ -4,10 +4,14 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import type { SquadRecord } from '@beyond180/shared';
+import HomePage from './src/screens/HomePage';
 import SportsAnalyticsPage from './src/screens/SportsAnalyticsPage';
 import SquadAnalyticsPage from './src/screens/SquadAnalyticsPage';
 
+type AppView = 'home' | 'analytics';
+
 export default function App() {
+  const [view, setView] = useState<AppView>('home');
   const [selectedSquad, setSelectedSquad] = useState<SquadRecord | null>(null);
   const [fontsLoaded] = useFonts({
     BebasNeue_400Regular,
@@ -30,8 +34,13 @@ export default function App() {
           squad={selectedSquad}
           onBack={() => setSelectedSquad(null)}
         />
+      ) : view === 'analytics' ? (
+        <SportsAnalyticsPage
+          onSelectSquad={setSelectedSquad}
+          onBack={() => setView('home')}
+        />
       ) : (
-        <SportsAnalyticsPage onSelectSquad={setSelectedSquad} />
+        <HomePage onOpenSportsAnalytics={() => setView('analytics')} />
       )}
       <StatusBar style="dark" />
     </>

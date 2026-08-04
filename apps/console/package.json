@@ -1,5 +1,5 @@
 {
-  "name": "@beyond180/sports-analytics",
+  "name": "@beyond180/console",
   "version": "1.0.0",
   "main": "index.ts",
   "private": true,

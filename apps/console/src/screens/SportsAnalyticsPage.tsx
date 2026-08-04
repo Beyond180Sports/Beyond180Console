@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Linking,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -16,23 +14,14 @@ import {
 } from '@beyond180/shared';
 import SquadRecordCard from '../components/SquadRecordCard';
 
-const HOMEPAGE_URL =
-  process.env.EXPO_PUBLIC_HOMEPAGE_URL ?? 'http://localhost:8081';
-
-function openHomepage() {
-  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    window.location.href = HOMEPAGE_URL;
-    return;
-  }
-  void Linking.openURL(HOMEPAGE_URL);
-}
-
 type SportsAnalyticsPageProps = {
   onSelectSquad: (squad: SquadRecord) => void;
+  onBack: () => void;
 };
 
 export default function SportsAnalyticsPage({
   onSelectSquad,
+  onBack,
 }: SportsAnalyticsPageProps) {
   const [squads, setSquads] = useState<SquadRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +57,7 @@ export default function SportsAnalyticsPage({
 
   return (
     <View style={styles.root}>
-      <Pressable accessibilityRole="button" onPress={openHomepage} style={styles.back}>
+      <Pressable accessibilityRole="button" onPress={onBack} style={styles.back}>
         <Text style={styles.backText}>← Beyond180 Sports</Text>
       </Pressable>
 
