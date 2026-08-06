@@ -12,6 +12,7 @@ import {
   fetchStaffSquads,
   type SquadRecord,
 } from '@beyond180/shared';
+import { useAuth } from '../auth/AuthContext';
 import SquadRecordCard from '../components/SquadRecordCard';
 
 type SportsAnalyticsPageProps = {
@@ -23,6 +24,8 @@ export default function SportsAnalyticsPage({
   onSelectSquad,
   onBack,
 }: SportsAnalyticsPageProps) {
+  const { profile } = useAuth();
+  const staffEmail = profile?.email ?? DEMO_STAFF_EMAIL;
   const [squads, setSquads] = useState<SquadRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +37,7 @@ export default function SportsAnalyticsPage({
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchStaffSquads(DEMO_STAFF_EMAIL);
+        const data = await fetchStaffSquads(staffEmail);
         if (!cancelled) {
           setSquads(data);
         }
@@ -53,7 +56,7 @@ export default function SportsAnalyticsPage({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [staffEmail]);
 
   return (
     <View style={styles.root}>
@@ -61,8 +64,8 @@ export default function SportsAnalyticsPage({
         <Text style={styles.backText}>← Beyond180 Sports</Text>
       </Pressable>
 
-      <Text style={styles.title}>Sports Analytics</Text>
-      <Text style={styles.subtitle}>Squads for {DEMO_STAFF_EMAIL}</Text>
+      <Text style={styles.title}>Data Analytics Dashboard</Text>
+      <Text style={styles.subtitle}>Squads for {staffEmail}</Text>
 
       {loading && (
         <View style={styles.centered}>

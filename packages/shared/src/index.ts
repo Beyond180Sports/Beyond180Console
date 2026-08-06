@@ -1,5 +1,16 @@
 export { supabase } from './supabase';
 export {
+  fetchUserProfile,
+  getSessionProfile,
+  passwordResetRateLimitRemainingMs,
+  requestPasswordReset,
+  signInWithEmailPassword,
+  signUpWithEmailPassword,
+  signOut,
+  type AuthProfile,
+} from './auth';
+export { deleteUserAccount } from './user';
+export {
   DEMO_STAFF_EMAIL,
   fetchStaffSquads,
   type SquadRecord,

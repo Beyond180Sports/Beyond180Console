@@ -11,13 +11,17 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useAuth } from '../auth/AuthContext';
+import AccountMenu from '../components/AccountMenu';
 
 const useNativeDriver = Platform.OS !== 'web';
 const dragonflyLogo = require('../../assets/dragonfly-logo.png');
 const coach180Logo = require('../../assets/coach180-logo.png');
-const video180Logo = require('../../assets/video180-logo.png');
 
-const COACH180_URL = 'https://coach180.beyond180.com/';
+const COACH180_APP_URL = 'https://coach180.beyond180.com/';
+const COACH180_LEARN_MORE_URL = 'https://www.beyond180.com/coach180';
+const COACH180_APP_DOWNLOAD_URL = 'https://www.beyond180.com/app-download';
+const VIDEO180_URL = 'https://www.beyond180.com/video180';
 
 function openExternalUrl(url: string) {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -26,6 +30,11 @@ function openExternalUrl(url: string) {
   }
   void Linking.openURL(url);
 }
+
+type PanelAction = {
+  label: string;
+  onPress?: () => void;
+};
 
 type DestinationPanelProps = {
   title: string;
@@ -37,6 +46,8 @@ type DestinationPanelProps = {
   delay: number;
   onPress?: () => void;
   backgroundImage?: number;
+  ctaLabel?: string;
+  actions?: PanelAction[];
 };
 
 function DestinationPanel({
@@ -49,11 +60,14 @@ function DestinationPanel({
   delay,
   onPress,
   backgroundImage,
+  ctaLabel = 'Enter →',
+  actions,
 }: DestinationPanelProps) {
   const fade = useRef(new Animated.Value(0)).current;
   const rise = useRef(new Animated.Value(28)).current;
   const scale = useRef(new Animated.Value(1)).current;
-  const isInteractive = Boolean(onPress);
+  const hasActions = Boolean(actions && actions.length > 0);
+  const isInteractive = Boolean(onPress) && !hasActions;
 
   useEffect(() => {
     Animated.parallel([
@@ -72,6 +86,52 @@ function DestinationPanel({
     ]).start();
   }, [delay, fade, rise]);
 
+  const content = (
+    <>
+      <LinearGradient
+        colors={gradientColors}
+        locations={gradientLocations}
+        start={gradientStart}
+        end={gradientEnd}
+        style={StyleSheet.absoluteFill}
+      />
+      {backgroundImage != null && (
+        <View style={styles.panelBackgroundImageWrap} pointerEvents="none">
+          <Image
+            source={backgroundImage}
+            style={styles.panelBackgroundImage}
+            resizeMode="contain"
+            accessibilityIgnoresInvertColors
+          />
+        </View>
+      )}
+      <Text style={styles.panelTitle}>{title}</Text>
+      <Text style={styles.panelSubtitle}>{subtitle}</Text>
+      {hasActions ? (
+        <View style={styles.panelActions}>
+          {actions!.map((action) => (
+            <Pressable
+              key={action.label}
+              accessibilityRole={action.onPress ? 'button' : undefined}
+              disabled={!action.onPress}
+              onPress={action.onPress}
+              style={({ hovered, pressed }) => [
+                styles.panelAction,
+                action.onPress && styles.panelInteractive,
+                action.onPress && (hovered || pressed) && styles.panelActionPressed,
+                !action.onPress && styles.panelActionDisabled,
+              ]}
+            >
+              <Text style={styles.panelCta}>{action.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : (
+        <Text style={styles.panelCta}>{ctaLabel}</Text>
+      )}
+    </>
+  );
+
   return (
     <Animated.View
       style={[
@@ -82,68 +142,52 @@ function DestinationPanel({
         },
       ]}
     >
-      <Pressable
-        accessibilityRole={isInteractive ? 'button' : undefined}
-        disabled={!isInteractive}
-        onPress={onPress}
-        onPressIn={() => {
-          if (!isInteractive) {
-            return;
-          }
-          Animated.spring(scale, {
-            toValue: 0.985,
-            useNativeDriver,
-            speed: 40,
-            bounciness: 4,
-          }).start();
-        }}
-        onPressOut={() => {
-          if (!isInteractive) {
-            return;
-          }
-          Animated.spring(scale, {
-            toValue: 1,
-            useNativeDriver,
-            speed: 20,
-            bounciness: 6,
-          }).start();
-        }}
-        style={({ hovered, pressed }) => [
-          styles.panel,
-          isInteractive && styles.panelInteractive,
-          isInteractive && (hovered || pressed) && styles.panelPressed,
-        ]}
-      >
-        <LinearGradient
-          colors={gradientColors}
-          locations={gradientLocations}
-          start={gradientStart}
-          end={gradientEnd}
-          style={StyleSheet.absoluteFill}
-        />
-        {backgroundImage != null && (
-          <View style={styles.panelBackgroundImageWrap} pointerEvents="none">
-            <Image
-              source={backgroundImage}
-              style={styles.panelBackgroundImage}
-              resizeMode="contain"
-              accessibilityIgnoresInvertColors
-            />
-          </View>
-        )}
-        <Text style={styles.panelTitle}>{title}</Text>
-        <Text style={styles.panelSubtitle}>{subtitle}</Text>
-        <Text style={styles.panelCta}>Enter →</Text>
-      </Pressable>
+      {isInteractive ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onPress}
+          onPressIn={() => {
+            Animated.spring(scale, {
+              toValue: 0.985,
+              useNativeDriver,
+              speed: 40,
+              bounciness: 4,
+            }).start();
+          }}
+          onPressOut={() => {
+            Animated.spring(scale, {
+              toValue: 1,
+              useNativeDriver,
+              speed: 20,
+              bounciness: 6,
+            }).start();
+          }}
+          style={({ hovered, pressed }) => [
+            styles.panel,
+            styles.panelInteractive,
+            (hovered || pressed) && styles.panelPressed,
+          ]}
+        >
+          {content}
+        </Pressable>
+      ) : (
+        <View style={styles.panel}>{content}</View>
+      )}
     </Animated.View>
   );
 }
 
 export default function HomePage({
   onOpenSportsAnalytics,
+  onOpenSignIn,
+  onOpenCreateAccount,
 }: {
   onOpenSportsAnalytics: () => void;
+  onOpenSignIn: () => void;
+  onOpenCreateAccount: () => void;
 }) {
+  const { profile } = useAuth();
+  const isLoggedIn = profile != null;
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
   const bannerFade = useRef(new Animated.Value(0)).current;
@@ -182,54 +226,111 @@ export default function HomePage({
           />
           <Text style={styles.brand}>Beyond180 Sports</Text>
         </View>
+        <AccountMenu
+          onSignIn={onOpenSignIn}
+          onCreateAccount={onOpenCreateAccount}
+        />
       </Animated.View>
 
-      <View style={styles.panels}>
-        <View style={[styles.panelRow, !isWide && styles.panelRowStacked]}>
-          <DestinationPanel
-            title="Coach180"
-            subtitle="Squad and player management with team event scheduling and game event tracking."
-            gradientColors={leftGradient.colors}
-            gradientLocations={leftGradient.locations}
-            gradientStart={leftGradient.start}
-            gradientEnd={leftGradient.end}
-            delay={120}
-            onPress={() => openExternalUrl(COACH180_URL)}
-            backgroundImage={coach180Logo}
-          />
-          <DestinationPanel
-            title="Sports Analytics"
-            subtitle="Time series analytics for data collected across Beyond180 Sports platforms."
-            gradientColors={rightGradient.colors}
-            gradientLocations={rightGradient.locations}
-            gradientStart={rightGradient.start}
-            gradientEnd={rightGradient.end}
-            delay={200}
-            onPress={onOpenSportsAnalytics}
-          />
+      {isLoggedIn ? (
+        <View style={[styles.panels, !isWide && styles.panelsStacked]}>
+          <View style={[styles.panelColumn, !isWide && styles.panelColumnTall]}>
+            <DestinationPanel
+              title="Coach180"
+              subtitle="Squad and player management with team event scheduling and game event tracking."
+              gradientColors={leftGradient.colors}
+              gradientLocations={leftGradient.locations}
+              gradientStart={leftGradient.start}
+              gradientEnd={leftGradient.end}
+              delay={120}
+              onPress={() => openExternalUrl(COACH180_APP_URL)}
+              backgroundImage={coach180Logo}
+            />
+            <DestinationPanel
+              title="Power Admin Functions"
+              subtitle="Support for bulk squad uploads, PDF loaders, and video loaders."
+              gradientColors={leftGradient.colors}
+              gradientLocations={leftGradient.locations}
+              gradientStart={leftGradient.start}
+              gradientEnd={leftGradient.end}
+              delay={280}
+            />
+            <DestinationPanel
+              title="Player Development"
+              subtitle="Track individual progress, skills, and development pathways across the season."
+              gradientColors={leftGradient.colors}
+              gradientLocations={leftGradient.locations}
+              gradientStart={leftGradient.start}
+              gradientEnd={leftGradient.end}
+              delay={440}
+            />
+          </View>
+          <View style={[styles.panelColumn, !isWide && styles.panelColumnShort]}>
+            <DestinationPanel
+              title="Data Analytics Dashboard"
+              subtitle="Time series analytics for data collected across Beyond180 Sports platforms."
+              gradientColors={rightGradient.colors}
+              gradientLocations={rightGradient.locations}
+              gradientStart={rightGradient.start}
+              gradientEnd={rightGradient.end}
+              delay={200}
+              onPress={onOpenSportsAnalytics}
+            />
+            <DestinationPanel
+              title="Video180"
+              subtitle="Game video loader that uses AI engines to analyze footage and extract insights."
+              gradientColors={rightGradient.colors}
+              gradientLocations={rightGradient.locations}
+              gradientStart={rightGradient.start}
+              gradientEnd={rightGradient.end}
+              delay={360}
+              onPress={() => openExternalUrl(VIDEO180_URL)}
+              ctaLabel="Learn More →"
+            />
+          </View>
         </View>
-        <View style={[styles.panelRow, !isWide && styles.panelRowStacked]}>
-          <DestinationPanel
-            title="Admin Tools"
-            subtitle="Support for bulk squad uploads, PDF loaders, and video loaders."
-            gradientColors={leftGradient.colors}
-            gradientLocations={leftGradient.locations}
-            gradientStart={leftGradient.start}
-            gradientEnd={leftGradient.end}
-            delay={280}
-          />
-          <DestinationPanel
-            title="Video180"
-            subtitle="Game video loader that uses AI engines to analyze footage and extract insights."
-            gradientColors={rightGradient.colors}
-            gradientLocations={rightGradient.locations}
-            gradientStart={rightGradient.start}
-            gradientEnd={rightGradient.end}
-            delay={360}
-            backgroundImage={video180Logo}
-          />
+      ) : (
+        <View style={[styles.panels, !isWide && styles.panelsStacked]}>
+          <View style={styles.panelColumn}>
+            <DestinationPanel
+              title="Coach180"
+              subtitle="Squad and player management with team event scheduling and game event tracking."
+              gradientColors={leftGradient.colors}
+              gradientLocations={leftGradient.locations}
+              gradientStart={leftGradient.start}
+              gradientEnd={leftGradient.end}
+              delay={120}
+              backgroundImage={coach180Logo}
+              actions={[
+                {
+                  label: 'Learn More →',
+                  onPress: () => openExternalUrl(COACH180_LEARN_MORE_URL),
+                },
+                {
+                  label: 'Download the App →',
+                  onPress: () => openExternalUrl(COACH180_APP_DOWNLOAD_URL),
+                },
+                {
+                  label: 'View Demo →',
+                },
+              ]}
+            />
+          </View>
+          <View style={styles.panelColumn}>
+            <DestinationPanel
+              title="Video180"
+              subtitle="Game video loader that uses AI engines to analyze footage and extract insights."
+              gradientColors={rightGradient.colors}
+              gradientLocations={rightGradient.locations}
+              gradientStart={rightGradient.start}
+              gradientEnd={rightGradient.end}
+              delay={200}
+              onPress={() => openExternalUrl(VIDEO180_URL)}
+              ctaLabel="Learn More →"
+            />
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -240,6 +341,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   banner: {
+    position: 'relative',
     paddingTop: 28,
     paddingBottom: 22,
     paddingHorizontal: 24,
@@ -266,16 +368,22 @@ const styles = StyleSheet.create({
   },
   panels: {
     flex: 1,
+    flexDirection: 'row',
     gap: 1,
     backgroundColor: 'rgba(30, 111, 232, 0.2)',
   },
-  panelRow: {
+  panelsStacked: {
+    flexDirection: 'column',
+  },
+  panelColumn: {
     flex: 1,
-    flexDirection: 'row',
     gap: 1,
   },
-  panelRowStacked: {
-    flexDirection: 'column',
+  panelColumnTall: {
+    flex: 3,
+  },
+  panelColumnShort: {
+    flex: 2,
   },
   panelShell: {
     flex: 1,
@@ -324,6 +432,19 @@ const styles = StyleSheet.create({
     color: 'rgba(18, 58, 122, 0.72)',
     maxWidth: 300,
     marginBottom: 20,
+  },
+  panelActions: {
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  panelAction: {
+    paddingVertical: 2,
+  },
+  panelActionPressed: {
+    opacity: 0.7,
+  },
+  panelActionDisabled: {
+    opacity: 0.45,
   },
   panelCta: {
     fontFamily: 'DMSans_700Bold',

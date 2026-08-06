@@ -4,13 +4,16 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import type { SquadRecord } from '@beyond180/shared';
+import { AuthProvider } from './src/auth/AuthContext';
+import CreateAccountPage from './src/screens/CreateAccountPage';
 import HomePage from './src/screens/HomePage';
+import LoginPage from './src/screens/LoginPage';
 import SportsAnalyticsPage from './src/screens/SportsAnalyticsPage';
 import SquadAnalyticsPage from './src/screens/SquadAnalyticsPage';
 
-type AppView = 'home' | 'analytics';
+type AppView = 'home' | 'analytics' | 'login' | 'createAccount';
 
-export default function App() {
+function ConsoleApp() {
   const [view, setView] = useState<AppView>('home');
   const [selectedSquad, setSelectedSquad] = useState<SquadRecord | null>(null);
   const [fontsLoaded] = useFonts({
@@ -34,16 +37,40 @@ export default function App() {
           squad={selectedSquad}
           onBack={() => setSelectedSquad(null)}
         />
+      ) : view === 'createAccount' ? (
+        <CreateAccountPage
+          onBack={() => setView('home')}
+          onSignIn={() => setView('login')}
+          onSuccess={() => setView('home')}
+        />
+      ) : view === 'login' ? (
+        <LoginPage
+          onBack={() => setView('home')}
+          onSuccess={() => setView('home')}
+          onCreateAccount={() => setView('createAccount')}
+        />
       ) : view === 'analytics' ? (
         <SportsAnalyticsPage
           onSelectSquad={setSelectedSquad}
           onBack={() => setView('home')}
         />
       ) : (
-        <HomePage onOpenSportsAnalytics={() => setView('analytics')} />
+        <HomePage
+          onOpenSportsAnalytics={() => setView('analytics')}
+          onOpenSignIn={() => setView('login')}
+          onOpenCreateAccount={() => setView('createAccount')}
+        />
       )}
       <StatusBar style="dark" />
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <ConsoleApp />
+    </AuthProvider>
   );
 }
 

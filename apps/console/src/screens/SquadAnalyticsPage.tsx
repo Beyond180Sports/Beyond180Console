@@ -568,7 +568,7 @@ export default function SquadAnalyticsPage({ squad, onBack }: SquadAnalyticsPage
     <View style={styles.root}>
       <View style={styles.topBar}>
         <Pressable accessibilityRole="button" onPress={onBack} style={styles.back}>
-          <Text style={styles.backText}>← Sports Analytics</Text>
+          <Text style={styles.backText}>← Data Analytics Dashboard</Text>
         </Pressable>
       </View>
 
