@@ -48,6 +48,8 @@ type DestinationPanelProps = {
   backgroundImage?: number;
   ctaLabel?: string;
   actions?: PanelAction[];
+  pro?: boolean;
+  comingSoon?: boolean;
 };
 
 function DestinationPanel({
@@ -62,6 +64,8 @@ function DestinationPanel({
   backgroundImage,
   ctaLabel = 'Enter →',
   actions,
+  pro = false,
+  comingSoon = false,
 }: DestinationPanelProps) {
   const fade = useRef(new Animated.Value(0)).current;
   const rise = useRef(new Animated.Value(28)).current;
@@ -105,8 +109,34 @@ function DestinationPanel({
           />
         </View>
       )}
-      <Text style={styles.panelTitle}>{title}</Text>
-      <Text style={styles.panelSubtitle}>{subtitle}</Text>
+      {pro && (
+        <View style={styles.proBadge} accessibilityLabel="Pro feature">
+          <Text style={styles.badgeText}>PRO</Text>
+        </View>
+      )}
+      {comingSoon && (
+        <View style={styles.comingSoonBadge} accessibilityLabel="Coming soon">
+          <Text style={styles.badgeText}>COMING SOON</Text>
+        </View>
+      )}
+      <Text
+        style={[
+          styles.panelTitle,
+          pro && styles.panelTitlePro,
+          comingSoon && styles.panelTitleComingSoon,
+        ]}
+      >
+        {title}
+      </Text>
+      <Text
+        style={[
+          styles.panelSubtitle,
+          pro && styles.panelSubtitlePro,
+          comingSoon && styles.panelSubtitleComingSoon,
+        ]}
+      >
+        {subtitle}
+      </Text>
       {hasActions ? (
         <View style={styles.panelActions}>
           {actions!.map((action) => (
@@ -122,12 +152,28 @@ function DestinationPanel({
                 !action.onPress && styles.panelActionDisabled,
               ]}
             >
-              <Text style={styles.panelCta}>{action.label}</Text>
+              <Text
+                style={[
+                  styles.panelCta,
+                  pro && styles.panelCtaPro,
+                  comingSoon && styles.panelCtaComingSoon,
+                ]}
+              >
+                {action.label}
+              </Text>
             </Pressable>
           ))}
         </View>
       ) : (
-        <Text style={styles.panelCta}>{ctaLabel}</Text>
+        <Text
+          style={[
+            styles.panelCta,
+            pro && styles.panelCtaPro,
+            comingSoon && styles.panelCtaComingSoon,
+          ]}
+        >
+          {ctaLabel}
+        </Text>
       )}
     </>
   );
@@ -179,10 +225,12 @@ function DestinationPanel({
 
 export default function HomePage({
   onOpenSportsAnalytics,
+  onOpenPowerAdmin,
   onOpenSignIn,
   onOpenCreateAccount,
 }: {
   onOpenSportsAnalytics: () => void;
+  onOpenPowerAdmin: () => void;
   onOpenSignIn: () => void;
   onOpenCreateAccount: () => void;
 }) {
@@ -207,8 +255,22 @@ export default function HomePage({
     end: isWide ? { x: 1, y: 0.5 } : { x: 0.5, y: 1 },
   };
 
-  const rightGradient = {
-    colors: ['#FFFFFF', '#D6E8FF', '#4A8FF0', '#1E6FE8'] as [string, string, ...string[]],
+  const leftProGradient = {
+    colors: ['#6B3FA0', '#8B5CF6', '#EDE4FF', '#FFFFFF'] as [string, string, ...string[]],
+    locations: [0, 0.05, 0.28, 0.5] as [number, number, ...number[]],
+    start: isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 },
+    end: isWide ? { x: 1, y: 0.5 } : { x: 0.5, y: 1 },
+  };
+
+  const rightProGradient = {
+    colors: ['#FFFFFF', '#EDE4FF', '#8B5CF6', '#6B3FA0'] as [string, string, ...string[]],
+    locations: [0.5, 0.72, 0.95, 1] as [number, number, ...number[]],
+    start: isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 },
+    end: isWide ? { x: 1, y: 0.5 } : { x: 0.5, y: 1 },
+  };
+
+  const rightComingSoonGradient = {
+    colors: ['#FFFFFF', '#DDF5E5', '#3CB371', '#1F7A4D'] as [string, string, ...string[]],
     locations: [0.5, 0.72, 0.95, 1] as [number, number, ...number[]],
     start: isWide ? { x: 0, y: 0.5 } : { x: 0.5, y: 0 },
     end: isWide ? { x: 1, y: 0.5 } : { x: 0.5, y: 1 },
@@ -249,11 +311,13 @@ export default function HomePage({
             <DestinationPanel
               title="Power Admin Functions"
               subtitle="Support for bulk squad uploads, PDF loaders, and video loaders."
-              gradientColors={leftGradient.colors}
-              gradientLocations={leftGradient.locations}
-              gradientStart={leftGradient.start}
-              gradientEnd={leftGradient.end}
+              gradientColors={leftProGradient.colors}
+              gradientLocations={leftProGradient.locations}
+              gradientStart={leftProGradient.start}
+              gradientEnd={leftProGradient.end}
               delay={280}
+              onPress={onOpenPowerAdmin}
+              pro
             />
             <DestinationPanel
               title="Player Development"
@@ -269,23 +333,25 @@ export default function HomePage({
             <DestinationPanel
               title="Data Analytics Dashboard"
               subtitle="Time series analytics for data collected across Beyond180 Sports platforms."
-              gradientColors={rightGradient.colors}
-              gradientLocations={rightGradient.locations}
-              gradientStart={rightGradient.start}
-              gradientEnd={rightGradient.end}
+              gradientColors={rightProGradient.colors}
+              gradientLocations={rightProGradient.locations}
+              gradientStart={rightProGradient.start}
+              gradientEnd={rightProGradient.end}
               delay={200}
               onPress={onOpenSportsAnalytics}
+              pro
             />
             <DestinationPanel
               title="Video180"
               subtitle="Game video loader that uses AI engines to analyze footage and extract insights."
-              gradientColors={rightGradient.colors}
-              gradientLocations={rightGradient.locations}
-              gradientStart={rightGradient.start}
-              gradientEnd={rightGradient.end}
+              gradientColors={rightComingSoonGradient.colors}
+              gradientLocations={rightComingSoonGradient.locations}
+              gradientStart={rightComingSoonGradient.start}
+              gradientEnd={rightComingSoonGradient.end}
               delay={360}
               onPress={() => openExternalUrl(VIDEO180_URL)}
               ctaLabel="Learn More →"
+              comingSoon
             />
           </View>
         </View>
@@ -320,13 +386,14 @@ export default function HomePage({
             <DestinationPanel
               title="Video180"
               subtitle="Game video loader that uses AI engines to analyze footage and extract insights."
-              gradientColors={rightGradient.colors}
-              gradientLocations={rightGradient.locations}
-              gradientStart={rightGradient.start}
-              gradientEnd={rightGradient.end}
+              gradientColors={rightComingSoonGradient.colors}
+              gradientLocations={rightComingSoonGradient.locations}
+              gradientStart={rightComingSoonGradient.start}
+              gradientEnd={rightComingSoonGradient.end}
               delay={200}
               onPress={() => openExternalUrl(VIDEO180_URL)}
               ctaLabel="Learn More →"
+              comingSoon
             />
           </View>
         </View>
@@ -452,5 +519,47 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: '#1E6FE8',
+  },
+  panelTitlePro: {
+    color: '#3B1F6E',
+  },
+  panelSubtitlePro: {
+    color: 'rgba(59, 31, 110, 0.72)',
+  },
+  panelCtaPro: {
+    color: '#7C3AED',
+  },
+  panelTitleComingSoon: {
+    color: '#14532D',
+  },
+  panelSubtitleComingSoon: {
+    color: 'rgba(20, 83, 45, 0.72)',
+  },
+  panelCtaComingSoon: {
+    color: '#15803D',
+  },
+  proBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: '#6B3FA0',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    zIndex: 2,
+  },
+  comingSoonBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: '#1F7A4D',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    zIndex: 2,
+  },
+  badgeText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.4,
+    color: '#FFFFFF',
   },
 });

@@ -1,0 +1,6 @@
+firstName,lastName,email,phone,emergencyEmail,emergencyPhone,number,heightCm,weightKg
+John,Smith,john.smith@example.com,+1234567890,emergency.smith@example.com,+1987654321,7,185,82
+Sarah,Johnson,sarah.j@example.com,+1234567891,emergency.johnson@example.com,+1987654322,10,170,65
+Michael,Williams,m.williams@example.com,+1234567892,emergency.williams@example.com,+1987654323,15,190,88
+Emma,Brown,emma.b@example.com,+1234567893,emergency.brown@example.com,+1987654324,23,175,70
+David,Jones,david.jones@example.com,+1234567894,emergency.jones@example.com,+1987654325,31,182,85

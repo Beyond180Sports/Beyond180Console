@@ -19,6 +19,7 @@
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
     "expo": "~57.0.8",
+    "expo-document-picker": "~14.0.7",
     "expo-font": "~57.0.1",
     "expo-linear-gradient": "~57.0.1",
     "expo-status-bar": "~57.0.1",
