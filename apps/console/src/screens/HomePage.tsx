@@ -226,11 +226,13 @@ function DestinationPanel({
 export default function HomePage({
   onOpenSportsAnalytics,
   onOpenPowerAdmin,
+  onOpenPlayerDevelopment,
   onOpenSignIn,
   onOpenCreateAccount,
 }: {
   onOpenSportsAnalytics: () => void;
   onOpenPowerAdmin: () => void;
+  onOpenPlayerDevelopment: () => void;
   onOpenSignIn: () => void;
   onOpenCreateAccount: () => void;
 }) {
@@ -327,6 +329,7 @@ export default function HomePage({
               gradientStart={leftGradient.start}
               gradientEnd={leftGradient.end}
               delay={440}
+              onPress={onOpenPlayerDevelopment}
             />
           </View>
           <View style={[styles.panelColumn, !isWide && styles.panelColumnShort]}>

@@ -8,17 +8,20 @@ import { AuthProvider } from './src/auth/AuthContext';
 import CreateAccountPage from './src/screens/CreateAccountPage';
 import HomePage from './src/screens/HomePage';
 import LoginPage from './src/screens/LoginPage';
+import PlayerDevelopmentPage from './src/screens/PlayerDevelopmentPage';
 import PowerAdminPage from './src/screens/PowerAdminPage';
 import RosterLoaderPage from './src/screens/RosterLoaderPage';
 import RosterUploadPage from './src/screens/RosterUploadPage';
 import SportsAnalyticsPage from './src/screens/SportsAnalyticsPage';
 import SquadAnalyticsPage from './src/screens/SquadAnalyticsPage';
+import SquadHousePage from './src/screens/SquadHousePage';
 
 type AppView =
   | 'home'
   | 'analytics'
   | 'powerAdmin'
   | 'rosterLoader'
+  | 'playerDevelopment'
   | 'login'
   | 'createAccount';
 
@@ -26,6 +29,7 @@ function ConsoleApp() {
   const [view, setView] = useState<AppView>('home');
   const [selectedSquad, setSelectedSquad] = useState<SquadRecord | null>(null);
   const [rosterSquad, setRosterSquad] = useState<SquadRecord | null>(null);
+  const [houseSquad, setHouseSquad] = useState<SquadRecord | null>(null);
   const [fontsLoaded] = useFonts({
     BebasNeue_400Regular,
     DMSans_400Regular,
@@ -53,6 +57,11 @@ function ConsoleApp() {
           onBack={() => setRosterSquad(null)}
           onSuccess={() => setRosterSquad(null)}
         />
+      ) : houseSquad ? (
+        <SquadHousePage
+          squad={houseSquad}
+          onBack={() => setHouseSquad(null)}
+        />
       ) : view === 'createAccount' ? (
         <CreateAccountPage
           onBack={() => setView('home')}
@@ -75,6 +84,11 @@ function ConsoleApp() {
           onSelectSquad={setRosterSquad}
           onBack={() => setView('powerAdmin')}
         />
+      ) : view === 'playerDevelopment' ? (
+        <PlayerDevelopmentPage
+          onSelectSquad={setHouseSquad}
+          onBack={() => setView('home')}
+        />
       ) : view === 'powerAdmin' ? (
         <PowerAdminPage
           onBack={() => setView('home')}
@@ -88,6 +102,7 @@ function ConsoleApp() {
         <HomePage
           onOpenSportsAnalytics={() => setView('analytics')}
           onOpenPowerAdmin={() => setView('powerAdmin')}
+          onOpenPlayerDevelopment={() => setView('playerDevelopment')}
           onOpenSignIn={() => setView('login')}
           onOpenCreateAccount={() => setView('createAccount')}
         />
