@@ -24,6 +24,7 @@ export async function fetchStaffSquads(staffEmail: string): Promise<SquadRecord[
     .select('*, SubTeam(id, name, leagueName)')
     .contains('staff', [staffEmail])
     .is('deletedAt', null)
+    .order('order', { ascending: false })
     .order('name', { ascending: true });
 
   if (error) {
