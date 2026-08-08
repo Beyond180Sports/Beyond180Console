@@ -127,13 +127,13 @@ export default function GridView({
             </SvgText>
 
             <SvgText
-              x={14}
-              y={14}
+              x={18}
+              y={52}
               fontSize="14"
               fill="#123A7A"
               fontWeight="bold"
               textAnchor="middle"
-              transform="rotate(-90, 14, 14)"
+              transform="rotate(-90, 18, 52)"
             >
               Attitude
             </SvgText>
@@ -285,8 +285,8 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
     minHeight: 0,
   },
 });

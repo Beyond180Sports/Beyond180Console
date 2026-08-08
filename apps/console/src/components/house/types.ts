@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { HouseMarker } from '@beyond180/shared';
 
 export type PlayerPosition = {
@@ -14,6 +15,7 @@ export type PlayerPosition = {
 
 export type HouseBoardProps = {
   teamId: string;
+  header?: ReactNode;
 };
 
 export type FilterOption = {

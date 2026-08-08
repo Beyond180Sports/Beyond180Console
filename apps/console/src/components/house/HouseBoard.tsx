@@ -45,7 +45,7 @@ const PLAYER_COLORS = [
   '#EC4899',
 ];
 
-export default function HouseBoard({ teamId }: HouseBoardProps) {
+export default function HouseBoard({ teamId, header }: HouseBoardProps) {
   const [selectedSubteam, setSelectedSubteam] = useState<string | null>(null);
   const [selectedPlayerFilter, setSelectedPlayerFilter] = useState<string | null>(
     null,
@@ -86,7 +86,9 @@ export default function HouseBoard({ teamId }: HouseBoardProps) {
   const [comment, setComment] = useState('');
   const [aptitudeValue, setAptitudeValue] = useState(0);
   const [attitudeValue, setAttitudeValue] = useState(0);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() =>
+    normalizeFilterDate(new Date()),
+  );
   const [markerDate, setMarkerDate] = useState<Date>(new Date());
 
   const handleDateFilterChange = (date: Date | null) => {
@@ -738,14 +740,17 @@ export default function HouseBoard({ teamId }: HouseBoardProps) {
 
   return (
     <View style={styles.root}>
-      <View style={styles.filters}>
-        <View style={styles.filterRow}>
+      <View style={styles.sidebar}>
+        {header}
+
+        <View style={styles.filters}>
           {subteams.length > 0 ? (
             <FilterDropdown
               options={teamFilterOptions}
               selectedId={selectedSubteam}
               onSelect={setSelectedSubteam}
               placeholder="All Teams"
+              style={styles.filterControl}
             />
           ) : null}
           <PlayerSearchDropdown
@@ -753,88 +758,94 @@ export default function HouseBoard({ teamId }: HouseBoardProps) {
             selectedId={selectedPlayerFilter}
             onSelect={setSelectedPlayerFilter}
             placeholder="All Players"
+            style={styles.filterControl}
           />
           <HouseDateFilterButton
             value={selectedDate}
             onChange={handleDateFilterChange}
           />
+          <AddPlayerDropdown
+            options={addPlayerOptions}
+            onSelect={handleAddPlayerToHouse}
+          />
+          <Text style={styles.hint}>
+            {isLoading
+              ? 'Loading player markers...'
+              : historyPlayerId
+                ? 'Showing player marker history. Tap marker to edit or free space to add new.'
+                : 'Tap a marker to view that player\'s history'}
+          </Text>
         </View>
-
-        <AddPlayerDropdown
-          options={addPlayerOptions}
-          onSelect={handleAddPlayerToHouse}
-        />
-
-        <Text style={styles.hint}>
-          {isLoading
-            ? 'Loading player markers...'
-            : historyPlayerId
-              ? 'Showing player marker history. Tap marker to edit or free space to add new.'
-              : 'Tap a marker to view that player\'s history'}
-        </Text>
       </View>
 
-      <View style={styles.tabs}>
-        <Pressable
-          onPress={() => setActiveTab('grid')}
-          style={[styles.tab, activeTab === 'grid' && styles.tabActive]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'grid' && styles.tabTextActive,
-            ]}
-          >
-            Grid
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setActiveTab('list')}
-          style={[styles.tab, activeTab === 'list' && styles.tabActive]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'list' && styles.tabTextActive,
-            ]}
-          >
-            List
-          </Text>
-        </Pressable>
-      </View>
-
-      {activeTab === 'grid' ? (
+      <View style={styles.main}>
         <View
-          style={styles.gridArea}
-          onLayout={(event) => {
-            const { width, height } = event.nativeEvent.layout;
-            setGridAreaSize((prev) =>
-              prev.width === width && prev.height === height
-                ? prev
-                : { width, height },
-            );
-          }}
+          style={[
+            styles.tabs,
+            gridSize > 0 ? { width: gridSize - 8 } : null,
+          ]}
         >
-          <GridView
-            gridSize={gridSize}
-            playerPositions={playerPositions}
-            gridToSvg={gridToSvg}
-            handleGridTap={handleGridTap}
-            historyPlayerId={historyPlayerId}
-          />
+          <Pressable
+            onPress={() => setActiveTab('grid')}
+            style={[styles.tab, activeTab === 'grid' && styles.tabActive]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'grid' && styles.tabTextActive,
+              ]}
+            >
+              Grid
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setActiveTab('list')}
+            style={[styles.tab, activeTab === 'list' && styles.tabActive]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'list' && styles.tabTextActive,
+              ]}
+            >
+              List
+            </Text>
+          </Pressable>
         </View>
-      ) : (
-        <View style={styles.listArea}>
-          <ListView
-            isLoading={isLoading}
-            teamMarkers={teamMarkers}
-            players={players}
-            visiblePlayerIds={visiblePlayerIds}
-            selectedDate={selectedDate}
-            handleEditMarker={handleEditMarker}
-          />
-        </View>
-      )}
+
+        {activeTab === 'grid' ? (
+          <View
+            style={styles.gridArea}
+            onLayout={(event) => {
+              const { width, height } = event.nativeEvent.layout;
+              setGridAreaSize((prev) =>
+                prev.width === width && prev.height === height
+                  ? prev
+                  : { width, height },
+              );
+            }}
+          >
+            <GridView
+              gridSize={gridSize}
+              playerPositions={playerPositions}
+              gridToSvg={gridToSvg}
+              handleGridTap={handleGridTap}
+              historyPlayerId={historyPlayerId}
+            />
+          </View>
+        ) : (
+          <View style={styles.listArea}>
+            <ListView
+              isLoading={isLoading}
+              teamMarkers={teamMarkers}
+              players={players}
+              visiblePlayerIds={visiblePlayerIds}
+              selectedDate={selectedDate}
+              handleEditMarker={handleEditMarker}
+            />
+          </View>
+        )}
+      </View>
 
       <MarkerModal
         markerModalVisible={markerModalVisible}
@@ -890,26 +901,39 @@ export default function HouseBoard({ teamId }: HouseBoardProps) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    flexDirection: 'row',
     minHeight: 0,
+    gap: 20,
   },
-  filters: {
-    marginBottom: 8,
+  sidebar: {
+    width: 240,
+    flexShrink: 0,
     zIndex: 10,
   },
-  filterRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  filters: {
+    marginTop: 16,
     gap: 8,
-    alignItems: 'center',
+    zIndex: 10,
+  },
+  filterControl: {
+    flexGrow: 0,
+    flexShrink: 0,
+    width: '100%',
   },
   hint: {
     fontFamily: 'DMSans_400Regular',
     fontSize: 12,
     color: 'rgba(18, 58, 122, 0.65)',
-    marginTop: 8,
+    marginTop: 4,
+  },
+  main: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 0,
   },
   tabs: {
     flexDirection: 'row',
+    alignSelf: 'flex-start',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(30, 111, 232, 0.15)',
     marginBottom: 8,

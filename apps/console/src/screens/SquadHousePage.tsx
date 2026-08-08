@@ -10,16 +10,23 @@ type SquadHousePageProps = {
 export default function SquadHousePage({ squad, onBack }: SquadHousePageProps) {
   return (
     <View style={styles.root}>
-      <Pressable accessibilityRole="button" onPress={onBack} style={styles.back}>
-        <Text style={styles.backText}>← Player Development</Text>
-      </Pressable>
+      <HouseBoard
+        teamId={squad.id}
+        header={
+          <View style={styles.header}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onBack}
+              style={styles.back}
+            >
+              <Text style={styles.backText}>← Player Development</Text>
+            </Pressable>
 
-      <Text style={styles.title}>{squad.name}</Text>
-      <Text style={styles.subtitle}>Rugby House · aptitude × attitude</Text>
-
-      <View style={styles.board}>
-        <HouseBoard teamId={squad.id} />
-      </View>
+            <Text style={styles.title}>{squad.name}</Text>
+            <Text style={styles.subtitle}>Rugby House · aptitude × attitude</Text>
+          </View>
+        }
+      />
     </View>
   );
 }
@@ -28,9 +35,12 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 28,
-    paddingTop: 28,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  header: {
+    marginBottom: 4,
   },
   back: {
     alignSelf: 'flex-start',
@@ -56,10 +66,5 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_400Regular',
     fontSize: 14,
     color: 'rgba(18, 58, 122, 0.65)',
-    marginBottom: 16,
-  },
-  board: {
-    flex: 1,
-    minHeight: 0,
   },
 });

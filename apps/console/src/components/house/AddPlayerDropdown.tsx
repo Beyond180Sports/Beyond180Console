@@ -84,15 +84,17 @@ export default function AddPlayerDropdown({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 8,
+    width: '100%',
   },
   trigger: {
-    alignSelf: 'flex-start',
+    width: '100%',
     backgroundColor: '#EAF2FF',
     borderWidth: 1,
     borderColor: 'rgba(30, 111, 232, 0.25)',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
+    minHeight: 42,
+    justifyContent: 'center',
   },
   triggerPressed: {
     backgroundColor: '#D6E8FF',

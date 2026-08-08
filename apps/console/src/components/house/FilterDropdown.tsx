@@ -111,8 +111,8 @@ export default function FilterDropdown({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     minWidth: 0,
+    width: '100%',
   },
   trigger: {
     flexDirection: 'row',
